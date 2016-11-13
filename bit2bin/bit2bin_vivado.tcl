@@ -93,6 +93,8 @@ proc main {} {
 	# Generate bin file
 	generate_output_file $bit_file_list
 
+	# back to project directory 
+	cd $project_dir
 
 }
 
