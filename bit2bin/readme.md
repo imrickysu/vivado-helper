@@ -15,3 +15,5 @@ Usage:
 - Right click Vivado toolbar and select "Customize Commands"
 - Click the green add button, input menu name "bit2bin", set "Source Tcl File" to the location of bit2bin_vivado.tcl, make sure "Add to toolbar" is selected
 - Click the tcl icon in toolbar when bit2bin conversion is needed
+
+For information of how to configure MPSoC PL in Linux, please refer to [[http://www.wiki.xilinx.com/+Programming+the+ZynqMP+Programmable+Logic]]
