@@ -9,8 +9,8 @@
 # - DRAM Test
 # - FSBL
 # - PMU FW
-proc create_zynqmp_apps {hdf_file {workspace ""}} {
-	puts "BESGEN: Creating ZYNQ MPSoC Applications"
+proc create_zynqmp_apps {hdf_file} {
+	puts "BESGEN: Creating ZYNQ MPSoC Applications. It may take several minutes."
 
 	# write tcl for xsct to file
 	set f [open "sdk.tcl" "w"]
@@ -18,6 +18,12 @@ proc create_zynqmp_apps {hdf_file {workspace ""}} {
 
 	# Set SDK workspace
 	puts $f "setws ./"
+
+	# Check whether old workspace exists. If so, exit because we only create apps in clean workspace.
+	puts $f "if \{\[llength \[getprojects\]\] > 0\} {"
+	puts $f "    puts \"Workspace is not empty. Exit.\""
+	puts $f "    return"
+	puts $f "}"
 
 	# Create a HW project
 	puts $f "createhw -name hw1 -hwspec $hdf_file"
@@ -140,10 +146,8 @@ proc main {} {
 	set project_part [get_property PART [current_project ]]
 
 	if { [string match "xczu*" $project_part] } {
-		puts "MPSoC"
 		create_zynqmp_apps edt_zcu102_wrapper.hdf
 	} elseif { [string match "xc7z*" $project_part] } {
-		puts "ZYNQ"
 		# create_zynq_apps
 	} else {
 		puts "BESGEN: Error: This is not a ZYNQ or ZYNQ MPSoC Project"
