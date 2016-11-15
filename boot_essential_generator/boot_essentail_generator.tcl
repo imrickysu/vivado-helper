@@ -13,7 +13,7 @@ proc create_zynqmp_apps {hdf_file} {
 	puts "BESGEN: Creating ZYNQ MPSoC Applications. It may take several minutes."
 
 	# write tcl for xsct to file
-	set f [open "sdk.tcl" "w"]
+	set f [open "create_zynqmp_apps.tcl" "w"]
 
 
 	# Set SDK workspace
