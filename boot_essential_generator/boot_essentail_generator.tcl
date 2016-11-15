@@ -10,7 +10,7 @@
 # - FSBL
 # - PMU FW
 proc create_zynqmp_apps {hdf_file} {
-	puts "BESGEN: Creating ZYNQ MPSoC Applications. It may take several minutes."
+	puts "BESGEN: Creating ZYNQ MPSoC Applications for $hdf_file. It may take several minutes."
 
 	# write tcl for xsct to file
 	set f [open "create_zynqmp_apps.tcl" "w"]
@@ -21,8 +21,10 @@ proc create_zynqmp_apps {hdf_file} {
 
 	# Check whether old workspace exists. If so, exit because we only create apps in clean workspace.
 	puts $f "if \{\[llength \[getprojects\]\] > 0\} {"
-	puts $f "    puts \"Workspace is not empty. Exit.\""
-	puts $f "    return"
+	puts $f "    puts \"BESGEN: ERROR: SDK Workspace is not empty.\""
+	puts $f "    puts \"BESGEN: BESGEN only works for empty SDK workspace.\""
+	puts $f "    puts \"BESGEN: Exit.\""
+	puts $f "    exit"
 	puts $f "}"
 
 	# Create a HW project
@@ -66,7 +68,7 @@ proc create_zynqmp_apps {hdf_file} {
 	close $f
 
 	# Execute
-	exec xsct sdk.tcl
+	exec xsct create_zynqmp_apps.tcl
 
 	# Check Results
 	#set fileList ["hw1", "standalone_bsp1", "hello_from_ddr", "hello_from_ocm", "dram_test", "fsbl"]
@@ -82,52 +84,54 @@ proc create_zynqmp_apps {hdf_file} {
 # - Hello world from OCM
 # - DRAM Test
 # - FSBL
-proc create_zynq_apps {hdf_file {workspace ""}} {
-	global stepN
-	incr stepN
-	puts "$stepN) Creating ZYNQ Applications"
+proc create_zynq_apps {hdf_file} {
 
-	global stepN
-	global DEFAULT_WORKSPACE
+	puts "BESGEN: Creating ZYNQ Applications for $hdf_file. It may take several minutes."
 
-	if {[string equal $workspace ""]} {
-		set workspace $DEFAULT_WORKSPACE
-	}
-
+	# write tcl for xsct to file
+	set f [open "create_zynq_apps.tcl" "w"]
 
 	# Set SDK workspace
-	puts "$stepN) Set Workspace to $workspace"
-	setws $workspace
+	puts $f "setws ./"
+
+	# Check whether old workspace exists. If so, exit because we only create apps in clean workspace.
+	puts $f "if \{\[llength \[getprojects\]\] > 0\} {"
+	puts $f "    puts \"BESGEN: ERROR: SDK Workspace is not empty.\""
+	puts $f "    puts \"BESGEN: BESGEN only works for empty SDK workspace.\""
+	puts $f "    puts \"BESGEN: Exit.\""
+	puts $f "    exit"
+	puts $f "}"
 
 	# Create a HW project
-	puts "$stepN) Creating HW based on $hdf_file"
-	createhw -name hw1 -hwspec $hdf_file
+	puts $f "createhw -name hw1 -hwspec $hdf_file"
 
 	# Create a BSP project
-	createbsp -name standalone_bsp1 -hwproject hw1 -proc ps7_cortexa9_0 -os standalone
+	puts $f "createbsp -name standalone_bsp1 -hwproject hw1 -proc ps7_cortexa9_0 -os standalone"
 	#projects -build -type bsp -name standalone_bsp1
-	setlib -hw hw1 -bsp standalone_bsp1 -lib xilffs
-	setlib -hw hw1 -bsp standalone_bsp1 -lib xilrsa
-	updatemss -hw hw1 -mss $workspace/standalone_bsp1/system.mss
-	regenbsp -hw hw1 -bsp standalone_bsp1
+	puts $f "setlib -hw hw1 -bsp standalone_bsp1 -lib xilffs"
+	puts $f "setlib -hw hw1 -bsp standalone_bsp1 -lib xilrsa"
+	puts $f "updatemss -hw hw1 -mss ./standalone_bsp1/system.mss"
+	puts $f "regenbsp -hw hw1 -bsp standalone_bsp1"
 	#projects -build -type bsp -name standalone_bsp1
 
 	# Create application projects
 	# - hello from ddr
-	createapp -name hello_from_ddr -hwproject hw1 -bsp standalone_bsp1 -proc ps7_cortexa9_0 -os standalone -lang C -app {Hello World}
+	puts $f "createapp -name hello_from_ddr -hwproject hw1 -bsp standalone_bsp1 -proc ps7_cortexa9_0 -os standalone -lang C -app {Hello World}"
 	# - hello from ocm
-	createapp -name hello_from_ocm -hwproject hw1 -bsp standalone_bsp1 -proc ps7_cortexa9_0 -os standalone -lang C -app {Hello World}
-	exec sed -i "s/> ps7_ddr_0_S_AXI_BASEADDR/> ps7_ocm_0_S_AXI_BASEADDR/g" $workspace/hello_from_ocm/src/lscript.ld
+	puts $f "createapp -name hello_from_ocm -hwproject hw1 -bsp standalone_bsp1 -proc ps7_cortexa9_0 -os standalone -lang C -app {Hello World}"
+	puts $f "exec sed -i \"s/> ps7_ddr_0_S_AXI_BASEADDR/> ps7_ocm_0_S_AXI_BASEADDR/g\" ./hello_from_ocm/src/lscript.ld"
 
 	# - zynq dram tests
-	createapp -name dram_test -hwproject hw1 -bsp standalone_bsp1 -proc ps7_cortexa9_0 -os standalone -lang C -app {Zynq DRAM tests}
+	puts $f "createapp -name dram_test -hwproject hw1 -bsp standalone_bsp1 -proc ps7_cortexa9_0 -os standalone -lang C -app {Zynq DRAM tests}"
 
 	# - zynq fsbl
-	createapp -name fsbl -hwproject hw1 -bsp standalone_bsp1 -proc ps7_cortexa9_0 -os standalone -lang C -app {Zynq FSBL}
-	configapp -app fsbl define-compiler-symbols FSBL_DEBUG_INFO
+	puts $f "createapp -name fsbl -hwproject hw1 -bsp standalone_bsp1 -proc ps7_cortexa9_0 -os standalone -lang C -app {Zynq FSBL}"
+	puts $f "configapp -app fsbl define-compiler-symbols FSBL_DEBUG_INFO"
 
 	# Build all projects
-	projects -build
+	puts $f "projects -build"
+
+	exec xsct create_zynq_apps.tcl
 
 	# Check Results
 	#set fileList ["hw1", "standalone_bsp1", "hello_from_ddr", "hello_from_ocm", "dram_test", "fsbl"]
@@ -145,10 +149,13 @@ proc main {} {
 	# Check processor type
 	set project_part [get_property PART [current_project ]]
 
+	# Check hdf name
+	set top_name [lindex [find_top] 0]
+
 	if { [string match "xczu*" $project_part] } {
-		create_zynqmp_apps edt_zcu102_wrapper.hdf
+		create_zynqmp_apps $top_name.hdf
 	} elseif { [string match "xc7z*" $project_part] } {
-		# create_zynq_apps
+		create_zynq_apps $top_name.hdf
 	} else {
 		puts "BESGEN: Error: This is not a ZYNQ or ZYNQ MPSoC Project"
 	}
