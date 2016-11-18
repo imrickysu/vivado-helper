@@ -16,4 +16,6 @@ Usage:
 - Click the green add button, input menu name "bit2bin", set "Source Tcl File" to the location of bit2bin_vivado.tcl, make sure "Add to toolbar" is selected
 - Click the tcl icon in toolbar when bit2bin conversion is needed
 
-For information of how to configure MPSoC PL in Linux, please refer to [[http://www.wiki.xilinx.com/+Programming+the+ZynqMP+Programmable+Logic]]
+For information of how to configure MPSoC PL in Linux, please refer to http://www.wiki.xilinx.com/+Programming+the+ZynqMP+Programmable+Logic
+
+Credit to icon author at http://icons.iconarchive.com/icons/yusuke-kamiyamane/fugue/16/blue-document-convert-icon.png

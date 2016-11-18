@@ -16,6 +16,8 @@
 # - Click the green add button, input menu name "bit2bin", set "Source Tcl File" to the location of bit2bin_vivado.tcl, make sure "Add to toolbar" is selected
 # - Click the tcl icon in toolbar when bit2bin conversion is needed
 
+package require fileutil
+
 # generate_output_file
 # @bit_file_list: a list of bit file name
 proc generate_output_file {bit_file_list} {
@@ -59,36 +61,17 @@ proc generate_output_file {bit_file_list} {
 	}
 }
 
-# glob-r
-# provids recursive search functions
-# borrowed from http://wiki.tcl.tk/1474
-proc glob-r {{dir .} args} {
-    set res {}
-    foreach i [lsort [glob -nocomplain -dir $dir *]] {
-        if {[file isdirectory $i]} {
-            eval [list lappend res] [eval [linsert $args 0 glob-r $i]]
-        } else {
-            if {[llength $args]} {
-                foreach arg $args {
-                    if {[string match $arg $i]} {
-                        lappend res $i
-                        break
-                    }
-                }
-            } else {
-                lappend res $i
-            }
-        }
-    }
-    return $res
-} ;
 
 # main function
 proc main {} {
 	# find bit files
 	set project_dir [get_property DIRECTORY [current_project ]]
 	cd $project_dir
-	set bit_file_list [glob-r . *.bit]
+	set bit_file_list [fileutil::findByPattern . *.bit]
+
+	if {[llength bit_file_list] == 0} {
+		error "BIT2BIN: ERROR: No bit files found in current project"
+	}
 
 	# Generate bin file
 	generate_output_file $bit_file_list
